@@ -1,0 +1,57 @@
+# A script to allow you to ping an IP address and it will convert to Hex equivalent
+# Concept of IR looking for IP regex in logs by @Nebulator inspired me to write this.
+# 
+# Author: @vysecurity
+
+alias ping {
+	# $1 - Self
+	# $2 - IP
+
+	if ($2){
+		$ip = $2;
+		($p1,$p2,$p3,$p4) = split("\\.", $ip);
+
+		if ((int($p1) >= 0) && (int($p1) <= 255) && (int($p2) >= 0) && (int($p2) <= 255) && (int($p3) >= 0) && (int($p3) <= 255) && (int($p4) >= 0) && (int($p4) <= 255)){
+			# Correct IP at this bit
+			
+			$p1h = formatNumber($p1, 10, 16);
+			$p2h = formatNumber($p2, 10, 16);
+			$p3h = formatNumber($p3, 10, 16);
+			$p4h = formatNumber($p4, 10, 16);
+
+			$p1hs = "$p1h";
+			$p2hs = "$p2h";
+			$p3hs = "$p3h";
+			$p4hs = "$p4h";
+
+			if (strlen($p1hs) == 1){
+				$p1hs = "0 $+ $p1hs";
+			}
+			if (strlen($p2hs) == 1){
+				$p2hs = "0 $+ $p2hs";
+			}
+			if (strlen($p3hs) == 1){
+				$p3hs = "0 $+ $p3hs";
+			}
+			if (strlen($p4hs) == 1){
+				$p4hs = "0 $+ $p4hs";
+			}
+
+			$final = "0x $+ $p1hs $+ $p2hs $+ $p3hs $+ $p4hs";
+
+			btask($1, "ping $ip  $+  :  $+  $final");
+			bshell($1, "ping $final");
+		}
+		else{
+			berror($1, "Invalid IP address");
+		}
+	}
+	else{
+		berror($1, "You must specify an IP address");
+	}
+}
+
+beacon_command_register("ping", "Issues Ping on the target after converting it to hex format to avoid some IR.",
+	"Syntax: ping [IP address]\n" .
+	"Issues a ping on the IP address specified after converting it to hex format to avoid some IR logging.");
+
