@@ -1,0 +1,120 @@
+# Blacklist.cna
+# Author: Vincent Yiu @vysecurity
+# Not responsible for you losing shells, check the blacklists before using.
+
+global('@blacklist');
+
+#$blacklist_pc = @("JOHN-PC", "TEQUILABOOMBOOM", "ANTONY-PC", "XFIIP-PC", "HOME-OFF-D5F0AC");
+#$blacklist_user = @();
+
+$blacklist = @(
+
+@("John *","JOHN-PC"),
+@("janettdoe *","TEQUILABOOMBOOM"),
+@("Antony *","ANTONY-PC"),
+@("xfIIp *","XFIIP-PC"),
+@("Dave *","HOME-OFF-D5F0AC")
+
+);
+
+on beacon_initial{
+    # $1 - ID of beacon
+    # $2 - text of the message
+    # $3 - time
+    
+    $pcname = binfo($1, "computer");
+    $username = binfo($1, "user");
+
+    if (@($username, $pcname) in $blacklist){
+        blog("[!] Blacklisted Pair: $username, $pcname");
+        blog("Exiting...");
+        bexit($1);
+        blog("Removing...");
+        bremove($1);
+    }
+
+}
+
+sub add_blacklist{
+    # $1 = beacon_id    
+    foreach $beacon ($1){
+        #elog($beacon);
+        $pair = @(binfo($beacon, "user"), binfo($beacon, "computer"));
+        if (!exists($pair)){
+            blog($beacon, "[*] Adding $pair to blacklist");
+            add($blacklist, $pair, -1);
+        }
+        else{
+            blog($beacon, "[!] $pair already exists in blacklist");
+        }
+    }
+    show_blacklist($beacon);
+}
+
+sub remove_blacklist{
+    # $1 = beacon_id
+    foreach $beacon ($1){
+        $pair = @(binfo($beacon, "user"), binfo($beacon, "computer"));
+        if (exists($pair)){
+            blog($beacon, "[*] Removing $pair from blacklist");
+            remove($blacklist, $pair);
+        }
+        else{
+            blog($beacon, "[!] $pair does not exist in blacklist");
+        }
+    }
+    show_blacklist($beacon);
+}
+
+sub show_blacklist{
+
+    blog($1, "========================");
+    if (size($1) <= 0){
+        blog($1, "[!] Empty Blacklist");
+    }
+    foreach $pair ($blacklist){
+        blog($1, "Blacklist: $pair");
+    }
+    blog($1, "========================");
+}
+
+popup beacon_bottom {
+    menu "Blacklist"{
+        item "Add to Blacklist" {
+            add_blacklist($1);
+        }
+        item "Remove from Blacklist" {
+            remove_blacklist($1);
+        }
+        item "Show Blacklist" {
+            show_blacklist($1);
+        }
+    }
+}
+
+sub exists{
+    # Check if blacklist already exists
+    # @("user", "computer");
+    if ($1 in $blacklist){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+
+alias blacklist-add {
+	# $1 = beacon_id
+    add_blacklist(@($1));
+}
+
+alias blacklist-remove {
+    # $1 = beacon_id
+    remove_blacklist(@($1));
+}
+
+alias blacklist-show {
+    show_blacklist($1);
+}
+
