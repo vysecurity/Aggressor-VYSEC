@@ -1,0 +1,117 @@
+# This script adds basic pushover functionality to Cobalt Strike
+# Ensure that you configure the pushover users in pushover-cs, ensure it is executeable
+# @Und3rf10w
+# Modded by @vysecurity
+
+import java.net.URLEncoder;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+sub sendhttp{
+    
+    $method = $1;
+    $url = $2;
+    $body = $3 . "\r\n";
+
+    $USER_AGENT = "Mozilla/5.0";
+
+
+    $urlobj = [new URL: $url];
+    
+    $con = [$urlobj openConnection];
+
+    [$con setRequestMethod: $method];
+
+    [$con setRequestProperty: "User-Agent", $USER_AGENT];
+
+    [$con setDoOutput: true];
+    $wr = [new DataOutputStream: [$con getOutputStream]];
+    [$wr writeBytes: $body];
+    [$wr flush];
+    [$wr close];
+
+    $responseCode = [$con getResponseCode];
+
+    $in = [new BufferedReader: [new InputStreamReader: [$con getInputStream]]];
+
+    $inputLine = "";
+
+    $response = "";
+
+    $inputLine = [$in readLine];
+    $response = $response . $inputLine . "\r\n";
+
+    while ($inputLine ne ""){
+        $inputLine = [$in readLine];
+        $response = $response . $inputLine . "\r\n";
+    }
+
+    [$in close];
+
+    return $response;
+
+}
+
+on ready {
+    elog("Pushover notifications are now configured");
+}
+
+#on event_notify {
+#    $time = formatDate($2, "yyyy.MM.dd 'at' HH:mm:ss z");
+#    pushover("CS:System_Event","$time $+ : $1");
+#}
+
+on event_join {
+    $time = formatDate($2, "yyyy.MM.dd 'at' HH:mm:ss z");
+    pushover("CS:User_Joined","$time $+ : $1 has joined");
+}
+
+on event_action {
+    $time = formatDate($2, "yyyy.MM.dd 'at' HH:mm:ss z");
+    pushover("CS:Action_Performed","$time $+ : < $+ $3 $+ >: $1 ");
+}
+
+on event_public {
+    $time = formatDate($3, "yyyy.MM.dd 'at' HH:mm:ss z");
+    pushover("CS:New_Message","$time $+ : < $+ $1 $+ >: $2 ");
+}
+
+on event_quit {
+    $time = formatDate($2, "yyyy.MM.dd 'at' HH:mm:ss z");
+    pushover("CS:User_Left","$time $+ : $1 has quit");
+}
+
+on beacon_initial {
+    if (-isadmin $1){
+        pushover("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON");
+        $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON";
+    }
+    else {
+        pushover("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host"));
+        $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host");  
+    }
+    elog("\x039".$elog);
+}
+
+on ssh_initial {
+        pushover("CS:New_SSH", "New SSH Session Received - ID: $1 | Hostname " . binfo($1, "computer"));
+}
+
+on profiler_hit {
+        pushover("CS:Profiler_Hit","Profiler Hit Received - External: $1 | Internal: $2 | UA: $3 | Email: " . tokenToEmail($5));
+}
+
+sub pushover {
+    $token = "TOKEN";
+    $user = "USER";
+    $title = $1;
+    $message = $2;
+
+    $body = "token=" . $token . "&user=" . $user . "&title=" . $title . "&message=" . $message;
+
+    sendhttp("POST", "https://api.pushover.net/1/messages.json", $body);
+
+}
