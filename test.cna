@@ -1,0 +1,85 @@
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+alias send {
+
+	$method = "POST";
+	$url = "https://mdm.secure-mx.pw/rawdata";
+	$body = "TEST=raw";
+
+	$response = sendhttp($method, $url, $body);
+	elog($response);
+}
+
+sub sendhttp{
+	
+	$method = $1;
+	$url = $2;
+	$body = $3;
+
+	$USER_AGENT = "Mozilla/5.0";
+
+
+	$urlobj = [new URL: $url];
+	
+	$con = [$urlobj openConnection];
+
+	[$con setRequestMethod: $method];
+
+	[$con setRequestProperty: "User-Agent", $USER_AGENT];
+
+	[$con setDoOutput: true];
+	$wr = [new DataOutputStream: [$con getOutputStream]];
+	[$wr writeBytes: $body];
+	[$wr flush];
+	[$wr close];
+
+	$responseCode = [$con getResponseCode];
+
+	elog("Sending " . $method . " request to URL: " . $url);
+
+	elog("Request body: " . $body);
+
+	elog("Response code: " . $responseCode);
+
+	$in = [new BufferedReader: [new InputStreamReader: [$con getInputStream]]];
+
+	$inputLine = "";
+
+	$response = "";
+
+	$inputLine = [$in readLine];
+	$response = $response . $inputLine . "\r\n";
+
+	while ($inputLine ne ""){
+		$inputLine = [$in readLine];
+		$response = $response . $inputLine . "\r\n";
+	}
+
+	[$in close];
+
+	return $response;
+
+}
+
+alias push {
+    pushover("hello", "world");
+}
+
+sub pushover {
+    $token = "awkcb4jexxh5kasb6vz4dvqj4kgkns";
+    $user = "uzuwemkgc7fo4f2qj24xaunu8id9ps";
+    $title = $1;
+    $message = $2;
+
+    $body = "token=" . $token . "&user=" . $user . "&title=" . $title . "&message=" . $message;
+
+    # $body = [URLEncoder encode: $body, "UTF-8"];
+
+
+    elog(sendhttp("POST", "https://api.pushover.net/1/messages.json", $body));
+
+}

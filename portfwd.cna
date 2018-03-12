@@ -1,0 +1,24 @@
+sub _portfwd {
+	if ($2 eq "stop") {
+		btask($1, "Tasked session to stop forward to $3");
+		call("beacons.pivot_stop_port", $null, $3);
+	}
+	else {
+		btask($1, "Tasked session to forward $3 to $2 $+ : $+ $3");
+		call("beacons.portfwd", $null, $1, $2, int($3));
+	}
+}
+
+# beacons
+beacon_command_register("portfwd", "create a port forward", "Synopsis: portfwd [stop|<host> <port>]\nCreate a port forward <team server>:<port> -> current beacon -> <host>:<port>");
+
+alias portfwd {
+	_portfwd($1, $2, $3);
+}
+
+# ssh sessions
+ssh_command_register("portfwd", "create a port forward", "Synopsis: portfwd [stop|<host> <port>]\nCreate a port forward <team server>:<port> -> current beacon -> <host>:<port>");
+
+ssh_alias portfwd {
+	_portfwd($1, $2, $3);
+}
