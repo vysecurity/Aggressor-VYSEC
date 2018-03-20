@@ -1,7 +1,8 @@
 # This script adds basic pushover functionality to Cobalt Strike
-# Ensure that you configure the pushover users in pushover-cs, ensure it is executeable
-# @Und3rf10w
+# Edit the API keys
+# Original script by @Und3rf10w
 # Modded by @vysecurity
+# Integrated with Aggressor based HTTP calls by @vysecurity
 
 import java.net.URLEncoder;
 import java.io.BufferedReader;
