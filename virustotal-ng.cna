@@ -106,7 +106,7 @@ sub domains{
 		$res = vtdomain($domain);
 		if ("{\"scan_id\"" isin $res){
 			# Domain seen in VT
-			if ("\"positives\": 0" !isin $res){
+			if ("\"positives\": 0" isin $res){
 				# Undetected
 				elog("\cD[VT] Clean: \c9" . $domain);
 			}
@@ -122,7 +122,7 @@ sub domains{
 	return @vtmaldomains;	
 }
 
-on heartbeat_10s {
+on heartbeat_10m {
 	@maldom = domains();
 
 	foreach $domain (@maldom){
