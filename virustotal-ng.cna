@@ -1,0 +1,142 @@
+# VirusTotal Notifications
+# Checks VirusTotal for your IOC
+
+
+import java.net.URLEncoder;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+global('@global_maldomains');
+@global_maldomains = @();
+
+sub sendhttp{
+    
+    $method = $1;
+    $url = $2;
+    $body = $3 . "\r\n";
+
+    $USER_AGENT = "Mozilla/5.0";
+
+
+    $urlobj = [new URL: $url];
+    
+    $con = [$urlobj openConnection];
+
+    [$con setRequestMethod: $method];
+
+    [$con setRequestProperty: "User-Agent", $USER_AGENT];
+
+    [$con setDoOutput: true];
+    $wr = [new DataOutputStream: [$con getOutputStream]];
+    [$wr writeBytes: $body];
+    [$wr flush];
+    [$wr close];
+
+    $responseCode = [$con getResponseCode];
+
+    $in = [new BufferedReader: [new InputStreamReader: [$con getInputStream]]];
+
+    $inputLine = "";
+
+    $response = "";
+
+    $inputLine = [$in readLine];
+    $response = $response . $inputLine . "\r\n";
+
+    while ($inputLine ne ""){
+        $inputLine = [$in readLine];
+        $response = $response . $inputLine . "\r\n";
+    }
+
+    [$in close];
+
+    return $response;
+
+}
+
+sub pushover {
+    $token = "TOKEN";
+    $user = "USER";
+    $title = $1;
+    $message = $2;
+
+    $body = "token=" . $token . "&user=" . $user . "&title=" . $title . "&message=" . $message;
+
+    sendhttp("POST", "https://api.pushover.net/1/messages.json", $body);
+}
+
+sub vtdomain {
+    $api = "VTAPIKEY";
+
+    $domain = $1;
+
+    $params = "?apikey=" . $api . "&resource=" . $domain;
+
+    $url = "https://www.virustotal.com/vtapi/v2/url/report" . $params;
+
+    return sendhttp("GET", $url, "");
+}
+
+sub domains{
+	
+	@domains = @();
+	$a = listeners();
+
+	foreach $b ($a) {
+		$c = listener_info($b);
+		$host = $c["host"];
+		if ($host !isin @domains){
+			add(@domains, $host, -1);
+		}
+		$beacons = $c["beacons"];
+		@beacons_list = split(", ",$beacons);
+		foreach $beacon (@beacons_list){
+			if ($beacon !isin @domains){
+				add(@domains, $beacon, -1);
+			}
+		}
+	}
+
+	@vtmaldomains = @();
+	
+	foreach $domain (@domains){
+		$res = vtdomain($domain);
+		if ("{\"scan_id\"" isin $res){
+			# Domain seen in VT
+			if ("\"positives\": 0" !isin $res){
+				# Undetected
+				elog("\cD[VT] Clean: \c9" . $domain);
+			}
+			else{
+				add(@vtmaldomains, $domain, -1);
+			}
+		}
+		else{
+			elog("\cD[VT] Not found: \c9" . $domain);
+		}
+	}
+
+	return @vtmaldomains;	
+}
+
+on heartbeat_10s {
+	@maldom = domains();
+
+	foreach $domain (@maldom){
+		if ($domain !isin @global_maldomains){
+			add(@global_maldomains, $domain, -1);
+			$time = formatDate(dstamp(ticks()), "yyyy.MM.dd 'at' HH:mm:ss z");
+			elog("\cD[VT] New malicious domain added: \c4" . $domain);
+			pushover("[VT] " . $domain . " MALICIOUS", $domain . " is classed as malicious");
+		}
+	}
+}
+
+
+
+on ready {
+    elog("VirusTotal notifications are now configured");
+}
