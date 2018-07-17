@@ -25,7 +25,7 @@ on beacon_initial{
     $pcname = binfo($1, "computer");
     $username = binfo($1, "user");
 
-    if (@($username, $pcname) in $blacklist){
+    if (@($username, $pcname) isin $blacklist){
         blog("[!] Blacklisted Pair: $username, $pcname");
         blog("Exiting...");
         bexit($1);
