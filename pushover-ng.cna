@@ -1,8 +1,12 @@
 # This script adds basic pushover functionality to Cobalt Strike
-# Edit the API keys
-# Original script by @Und3rf10w
+# Ensure that you configure the pushover users in pushover-cs, ensure it is executeable
+# @Und3rf10w
 # Modded by @vysecurity
-# Integrated with Aggressor based HTTP calls by @vysecurity
+
+$location = "https://<DOMAIN NAME>";
+$uri = "/URI";
+$token = "<PUSHOVER TOKEN>";
+$user = "<PUSHOVER USER>";
 
 import java.net.URLEncoder;
 import java.io.BufferedReader;
@@ -85,18 +89,6 @@ on event_quit {
     pushover("CS:User_Left","$time $+ : $1 has quit");
 }
 
-on beacon_initial {
-    if (-isadmin $1){
-        pushover("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON");
-        $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON";
-    }
-    else {
-        pushover("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host"));
-        $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host");  
-    }
-    elog("\x039".$elog);
-}
-
 on ssh_initial {
         pushover("CS:New_SSH", "New SSH Session Received - ID: $1 | Hostname " . binfo($1, "computer"));
 }
@@ -105,13 +97,48 @@ on profiler_hit {
         pushover("CS:Profiler_Hit","Profiler Hit Received - External: $1 | Internal: $2 | UA: $3 | Email: " . tokenToEmail($5));
 }
 
+on web_hit {
+#   elog($1);
+    if ($1 == "POST" && $5 == "404 Not Found"){
+        $time = formatDate($9, "yyyy.MM.dd 'at' HH:mm:ss z");
+        $vuri = $2;
+        $eval = strrep($vuri, $uri, "");
+        # eval contains final bid number to exit
+        bexit($eval);
+            
+    }
+}
+
+on beacon_initial {
+    if (-isadmin $1){
+        pushover2("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON", $1);
+        $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON";
+    }
+    else {
+        pushover2("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host"), $1);
+        $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host");
+    }
+    elog("\x039".$elog);
+}
+
 sub pushover {
-    $token = "TOKEN";
-    $user = "USER";
     $title = $1;
     $message = $2;
 
     $body = "token=" . $token . "&user=" . $user . "&title=" . $title . "&message=" . $message;
+#	elog($body);
+
+    sendhttp("POST", "https://api.pushover.net/1/messages.json", $body);
+
+}
+
+sub pushover2 {
+    $title = $1;
+    $message = $2;
+    $b = $3;
+
+    $body = "callback=" . $location . $uri . $b . "&priority=2&retry=10800&expire=10800&token=" . $token . "&user=" . $user . "&title=" . $title . "&message=" . $message;
+    elog($body);
 
     sendhttp("POST", "https://api.pushover.net/1/messages.json", $body);
 
