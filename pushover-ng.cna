@@ -17,8 +17,8 @@ import java.net.URL;
 
 sub sendpost{
 
-    $url = $2;
-    $body = $3 . "\r\n";
+    $url = $1;
+    $body = $2 . "\r\n";
 
     $USER_AGENT = "Mozilla/5.0";
 
@@ -73,9 +73,7 @@ sub sendpost{
 
 sub sendget{
     
-    $method = $1;
-
-    $url = $2;
+    $url = $1;
 
     $USER_AGENT = "Mozilla/5.0";
 
@@ -194,8 +192,6 @@ sub pushover {
 }
 
 sub pushover2 {
-    $token = "";
-    $user = "";
     $title = $1;
     $message = $2;
     $b = $3;
@@ -210,7 +206,7 @@ sub pushover2 {
 sub getorg{
     $ip = $1; 
     $url = "http://api.hackertarget.com/aslookup/?q=" . $ip;
-    $res = sendget("GET", $url);
+    $res = sendget($url);
     #elog("RES: ". $res);
     ($ip, $asn, $range, $org) = split(',', $res);
 
