@@ -146,8 +146,8 @@ on profiler_hit {
         pushover("CS:Profiler_Hit","Profiler Hit Received - External: $1 | Internal: $2 | UA: $3 | Email: " . tokenToEmail($5));
 }
 
-$location = "https://msft.space";
-$uri = "/deadlock";
+$location = "https://<DOMAIN>";
+$uri = "/<CALLBACK>";
 
 on web_hit {
 #   elog($1);
@@ -179,8 +179,8 @@ on beacon_initial {
 }
 
 sub pushover {
-    $token = "awkcb4jexxh5kasb6vz4dvqj4kgkns";
-    $user = "uzuwemkgc7fo4f2qj24xaunu8id9ps";
+    $token = "";
+    $user = "";
     $title = $1;
     $message = $2;
 
@@ -192,8 +192,8 @@ sub pushover {
 }
 
 sub pushover2 {
-    $token = "awkcb4jexxh5kasb6vz4dvqj4kgkns";
-    $user = "uzuwemkgc7fo4f2qj24xaunu8id9ps";
+    $token = "";
+    $user = "";
     $title = $1;
     $message = $2;
     $b = $3;
