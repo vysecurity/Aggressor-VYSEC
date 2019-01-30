@@ -151,9 +151,6 @@ on profiler_hit {
         pushover("CS:Profiler_Hit","Profiler Hit Received - External: $1 | Internal: $2 | UA: $3 | Email: " . tokenToEmail($5));
 }
 
-$location = "https://<DOMAIN>";
-$uri = "/<CALLBACK>";
-
 on web_hit {
 #   elog($1);
     if ($1 == "POST" && $5 == "404 Not Found"){
