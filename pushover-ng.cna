@@ -209,7 +209,7 @@ sub getorg{
     $ip = $1; 
     $url = "http://api.hackertarget.com/aslookup/?q=" . $ip;
     $res = sendget("GET", $url);
-    elog("RES: ". $res);
+    #elog("RES: ". $res);
     ($ip, $asn, $range, $org) = split(',', $res);
 
     $ip = strrep($ip, "\"", "");
