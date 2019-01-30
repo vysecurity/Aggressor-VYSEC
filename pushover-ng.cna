@@ -169,11 +169,11 @@ on beacon_initial {
     bnote($1, $org);
 
     if (-isadmin $1){
-        pushover2("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON", $1);
+        pushover2("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON | ORG: " . $org, $1);
         $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON | ORG: " . $org;
     }
     else {
-        pushover2("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host"), $1);
+        pushover2("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ORG: " . $org, $1);
         $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ORG: " . $org;
     }
 }
