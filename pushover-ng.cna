@@ -185,7 +185,7 @@ sub pushover {
     $message = $2;
 
     $body = "token=" . $token . "&user=" . $user . "&title=" . $title . "&message=" . $message;
-#	elog($body);
+#   elog($body);
 
     sendpost("https://api.pushover.net/1/messages.json", $body);
 
@@ -196,7 +196,7 @@ sub pushover2 {
     $message = $2;
     $b = $3;
 
-    $body = "callback=" . $location . $uri . $b . "&priority=2&retry=10800&expire=10800&token=" . $token . "&user=" . $user . "&title=" . $title . "&message=" . $message;
+    $body = "callback=" . $location . $uri . $b . "&priority=2&retry=60&expire=10800&token=" . $token . "&user=" . $user . "&title=" . $title . "&message=" . $message;
     #elog($body);
 
     sendpost("https://api.pushover.net/1/messages.json", $body);
