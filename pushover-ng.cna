@@ -151,6 +151,9 @@ on profiler_hit {
         pushover("CS:Profiler_Hit","Profiler Hit Received - External: $1 | Internal: $2 | UA: $3 | Email: " . tokenToEmail($5));
 }
 
+$location = "https://<DOMAIN>";
+$uri = "/<CALLBACK>";
+
 on web_hit {
 #   elog($1);
     if ($1 == "POST" && $5 == "404 Not Found"){
@@ -192,17 +195,18 @@ sub pushover {
 }
 
 sub pushover2 {
+    $token = "";
+    $user = "";
     $title = $1;
     $message = $2;
     $b = $3;
 
     $body = "callback=" . $location . $uri . $b . "&priority=2&retry=10800&expire=10800&token=" . $token . "&user=" . $user . "&title=" . $title . "&message=" . $message;
-    elog($body);
+    #elog($body);
 
     sendpost("https://api.pushover.net/1/messages.json", $body);
 
 }
-
 
 sub getorg{
     $ip = $1; 
