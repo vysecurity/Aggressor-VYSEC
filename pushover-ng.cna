@@ -162,18 +162,20 @@ on web_hit {
 }
 
 on beacon_initial {
-    if (-isadmin $1){
-        pushover2("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON", $1);
-        $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON";
-    }
-    else {
-        pushover2("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host"), $1);
-        $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host");
-    }
+    
     elog("\x039".$elog);
     $org = getorg(binfo($1, "external"));
 
     bnote($1, $org);
+
+    if (-isadmin $1){
+        pushover2("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON", $1);
+        $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ADMIN BEACON | ORG: " . $org;
+    }
+    else {
+        pushover2("CS:New_Beacon","New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host"), $1);
+        $elog = "New Beacon Received - ID: $1 | User: " . binfo($1, "user") . " | Hostname: " . binfo($1, "computer") . " | PID: " . binfo($1,"pid") . " | HOST: " . binfo($1,"host") . " | ORG: " . $org;
+    }
 }
 
 sub pushover {
